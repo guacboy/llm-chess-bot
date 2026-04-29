@@ -1,0 +1,24 @@
+# Virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Saved model checkpoints and game data (will be generated at runtime)
+saved_models/
+data/
+
+# Environment variables
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# Distribution / build
+dist/
+build/
+*.egg-info/

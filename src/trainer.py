@@ -5,8 +5,10 @@ from tqdm import tqdm
 
 from model import ChessNet
 
-MODEL_PATH = Path("saved_models/model.pt")
+# __file__ is src/trainer.py - go up two levels to reach the project root.
+MODEL_PATH = Path(__file__).parent.parent / "saved_models" / "model.pt"
 
+#TODO: add an option to clear the model's data
 
 def train(
     model: ChessNet,

@@ -7,10 +7,10 @@ from pathlib import Path
 from agent.encoder import board_to_tensor
 from agent.model import ChessNet, select_move
 
-# __file__ is src/agent/game.py — go up two levels to reach src/.
+# __file__ is src/agent/game.py - go up two levels to reach src/.
 DATA_PATH = Path(__file__).parent.parent / "data" / "games.pt"
 
-# The bot always keeps at least this much Stockfish usage, even when well-trained.
+# The bot always keeps at least this much Stockfish usage.
 MIN_EPSILON = 0.05
 
 # How much Stockfish usage drops after each game (5% per game).
@@ -36,9 +36,9 @@ def get_bot_move(
     Picks the bot's next move and reports where it came from.
 
     Returns (move, source) where source is one of:
-      "model"      — the trained model predicted this as the user's move
-      "stockfish"  — Stockfish's best move (used while model is still learning)
-      "random"     — fallback if Stockfish is unavailable
+      "model"      - the trained model predicted this as the user's move
+      "stockfish"  - Stockfish's best move (used while model is still learning)
+      "random"     - fallback if Stockfish is unavailable
 
     Epsilon controls the mix:
       High epsilon  → Stockfish   (early games, model untrained)
@@ -49,7 +49,7 @@ def get_bot_move(
     if use_model:
         return select_move(model, board, board_to_tensor(board), device), "model"
 
-    # Epsilon triggered — use Stockfish as the strong-play fallback.
+    # Epsilon triggered - use Stockfish as the strong-play fallback.
     if sf_engine is not None:
         try:
             result = sf_engine.play(board, chess.engine.Limit(time=0.1))
@@ -61,7 +61,7 @@ def get_bot_move(
 
 
 # ---------------------------------------------------------------------------
-# Data persistence — saving and loading experience between sessions
+# Data persistence - saving and loading experience between sessions
 # ---------------------------------------------------------------------------
 
 def load_experiences() -> list[tuple[torch.Tensor, int, float]]:

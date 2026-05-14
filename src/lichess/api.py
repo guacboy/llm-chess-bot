@@ -23,8 +23,7 @@ def get_client() -> berserk.Client:
 
 def find_stockfish() -> str | None:
     """
-    Looks for a Stockfish executable in src/stockfish/, then falls back to
-    the STOCKFISH_PATH environment variable, then the system PATH.
+    Looks for a Stockfish executable in src/stockfish/.
     Returns the path string if found, None otherwise.
     """
     # Auto-detect from the project's src/stockfish/ folder.
@@ -33,9 +32,7 @@ def find_stockfish() -> str | None:
         exes = list(sf_dir.glob("*.exe"))
         if exes:
             return str(exes[0])
-
-    # Fall back to .env or system PATH.
-    return os.environ.get("STOCKFISH_PATH", "stockfish")
+    return None
 
 
 def reconstruct_board(moves_str: str) -> chess.Board:
@@ -136,7 +133,7 @@ def handle_game(
             last_move_count = len(moves)
             board = reconstruct_board(moves_str)
 
-            # Game over — print summary and return experiences.
+            # Game over - print summary and return experiences.
             if status != "started":
                 winner = event.get("winner")
                 outcome = get_outcome(winner, user_color)
@@ -159,11 +156,11 @@ def handle_game(
                     if model_pct >= sf_pct:
                         print("  >> Bot is playing more like you than Stockfish now.")
                     else:
-                        print("  >> Bot still leans on Stockfish — keep playing to train it.")
+                        print("  >> Bot still leans on Stockfish - keep playing to train it.")
 
                 return [(t, idx, outcome) for t, idx in user_records]
 
-            # Still going — send bot's next move.
+            # Still going - send bot's next move.
             if not board.is_game_over() and board.turn == bot_color:
                 move, source = get_bot_move(board, model, device, epsilon, sf_engine)
                 move_counts[source] += 1
@@ -185,7 +182,7 @@ def run_lichess_loop(model: ChessNet, device: torch.device) -> None:
         sf_engine = chess.engine.SimpleEngine.popen_uci(sf_path)
         print(f"Stockfish loaded: {sf_path}")
     except Exception as e:
-        print(f"Stockfish not available ({e}) — falling back to random moves.")
+        print(f"Stockfish not available ({e}) - falling back to random moves.")
 
     # --- Lichess setup ---
     client = get_client()
@@ -205,7 +202,7 @@ def run_lichess_loop(model: ChessNet, device: torch.device) -> None:
             if event["type"] == "challenge":
                 challenge_id = event["challenge"]["id"]
                 challenger = event["challenge"]["challenger"]["id"]
-                print(f"Challenge from {challenger} — accepting...")
+                print(f"Challenge from {challenger} - accepting...")
                 client.bots.accept_challenge(challenge_id)
 
             elif event["type"] == "gameStart":

@@ -18,3 +18,9 @@ berserk>=0.14.0
 
 # Loads API token from .env file
 python-dotenv>=1.0.0
+
+# Stockfish chess engine (not a pip package — must be installed manually):
+#   1. Download the Windows binary from https://stockfishchess.org/download/
+#   2. Extract and place the .exe into src/stockfish/
+#      e.g. src/stockfish/stockfish-windows-x86-64-avx2.exe
+#   The bot auto-detects any .exe inside that folder at startup.

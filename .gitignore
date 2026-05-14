@@ -11,6 +11,9 @@ __pycache__/
 saved_models/
 data/
 
+# Stockfish binary (download manually — see requirements.txt)
+src/stockfish/
+
 # Environment variables
 .env
 

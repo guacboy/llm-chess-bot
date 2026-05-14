@@ -3,9 +3,9 @@ import torch
 
 sys.path.insert(0, "src")
 
-from model import ChessNet
-from trainer import load_model
-from lichess import run_lichess_loop
+from agent.model import ChessNet
+from agent.trainer import load_model
+from lichess.api import run_lichess_loop
 
 
 def main() -> None:

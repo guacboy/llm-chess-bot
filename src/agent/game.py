@@ -3,8 +3,8 @@ import random
 import torch
 from pathlib import Path
 
-from encoder import board_to_tensor
-from model import ChessNet, select_move
+from agent.encoder import board_to_tensor
+from agent.model import ChessNet, select_move
 
 # __file__ is src/game.py - go up two levels to reach the project root.
 DATA_PATH = Path(__file__).parent.parent / "data" / "games.pt"

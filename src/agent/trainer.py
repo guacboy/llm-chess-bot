@@ -3,10 +3,10 @@ import torch.nn.functional as F
 from pathlib import Path
 from tqdm import tqdm
 
-from model import ChessNet
+from agent.model import ChessNet
 
-# __file__ is src/trainer.py - go up two levels to reach the project root.
-MODEL_PATH = Path(__file__).parent.parent / "saved_models" / "model.pt"
+# __file__ is src/agent/trainer.py - go up three levels to reach the project root.
+MODEL_PATH = Path(__file__).parent.parent.parent / "saved_models" / "model.pt"
 
 #TODO: add an option to clear the model's data
 

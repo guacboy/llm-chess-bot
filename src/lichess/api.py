@@ -4,10 +4,10 @@ import torch
 import berserk
 from dotenv import load_dotenv
 
-from encoder import board_to_tensor
-from model import ChessNet, encode_move
-from game import get_epsilon, get_bot_move, load_experiences, save_experiences
-from trainer import train, save_model
+from agent.encoder import board_to_tensor
+from agent.model import ChessNet, encode_move
+from agent.game import get_epsilon, get_bot_move, load_experiences, save_experiences
+from agent.trainer import train, save_model
 
 load_dotenv()
 

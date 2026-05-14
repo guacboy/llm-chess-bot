@@ -2,7 +2,7 @@ import chess
 import torch
 import torch.nn as nn
 
-from encoder import INPUT_SIZE
+from agent.encoder import INPUT_SIZE
 
 # Every move goes from one of 64 squares to one of 64 squares.
 # 64 * 64 = 4096 possible from/to combinations.

@@ -82,3 +82,15 @@ def save_experiences(
     DATA_PATH.parent.mkdir(exist_ok=True)
     torch.save(all_experiences, DATA_PATH)
     return all_experiences
+
+
+def clear_experiences() -> None:
+    """
+    Deletes all saved game experience, wiping the training dataset.
+    Model weights are NOT affected - only the collected game data is wiped.
+    """
+    if DATA_PATH.exists():
+        DATA_PATH.unlink()
+        print("Training data cleared. Dataset will rebuild from the next game.")
+    else:
+        print("No training data found - nothing to clear.")

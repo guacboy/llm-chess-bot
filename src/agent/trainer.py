@@ -8,8 +8,6 @@ from agent.model import ChessNet
 # __file__ is src/agent/trainer.py - go up three levels to reach the project root.
 MODEL_PATH = Path(__file__).parent.parent.parent / "saved_models" / "model.pt"
 
-#TODO: add an option to clear the model's data
-
 def train(
     model: ChessNet,
     device: torch.device,
@@ -147,3 +145,15 @@ def load_model(model: ChessNet, device: torch.device) -> ChessNet:
     else:
         print("No saved model found - starting fresh with random weights.")
     return model
+
+
+def clear_model() -> None:
+    """
+    Deletes the saved model weights, resetting the bot back to random play.
+    Training data is NOT affected — only the learned weights are wiped.
+    """
+    if MODEL_PATH.exists():
+        MODEL_PATH.unlink()
+        print("Model weights cleared. Bot will start from scratch next run.")
+    else:
+        print("No saved model found — nothing to clear.")

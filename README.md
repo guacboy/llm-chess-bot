@@ -1,4 +1,4 @@
-# LLM Chess Bot
+# Mirror AI Chess Bot
 
 A chess bot that learns your playstyle and plays it back against you on Lichess. The idea is that you are essentially **playing against yourself** - the bot observes your moves, learns your tendencies, and gradually mirrors them back at you to help you identify recurring patterns and mistakes.
 
@@ -100,8 +100,8 @@ After every game, the full accumulated dataset is shuffled and trained for 5 epo
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/guacboy/llm-chess-bot.git
-cd llm-chess-bot
+git clone https://github.com/guacboy/mirror-ai-chess-bot.git
+cd mirror-ai-chess-bot
 ```
 
 ### 2. Create and activate a virtual environment

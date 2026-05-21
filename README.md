@@ -17,6 +17,74 @@ Over time the bot learns not just your style, but your *winning* style.
 
 ---
 
+## Algorithm
+
+### Model architecture — Feedforward Neural Network (MLP)
+
+The model is a **Multi-Layer Perceptron** built in PyTorch with ~1.84 million trainable parameters.
+
+**Input — board encoding (773 numbers)**
+
+Every chess position is converted into a flat vector of 773 floating-point numbers:
+- 12 binary 8×8 grids — one per piece type per colour (pawn, knight, bishop, rook, queen, king × white/black). Each cell is `1.0` if that piece occupies that square, `0.0` otherwise.
+- 1 value for whose turn it is (`1.0` = white, `0.0` = black)
+- 4 values for castling rights (one per right, `1.0` or `0.0`)
+
+**Network layers**
+
+```
+Input       773  numbers  (board state)
+    ↓  Linear + ReLU
+Layer 1     512  neurons
+    ↓  Linear + ReLU
+Layer 2     512  neurons
+    ↓  Linear + ReLU
+Layer 3     256  neurons
+    ↓  Linear
+Output     4096  numbers  (one score per possible from→to move)
+```
+
+**Output — move selection**
+
+The 4096 output scores cover every possible from-square/to-square combination (64 × 64). Before selecting a move, all illegal moves are masked to `-inf` and softmax is applied so the remaining scores sum to 1.0. The move with the highest probability is played.
+
+---
+
+### Learning algorithm — Outcome-Weighted Behavioural Cloning
+
+The training approach combines two ideas:
+
+**1. Behavioural cloning (supervised learning)**
+The model is trained to predict *your* moves. For each position you faced, it is shown the board state and asked to assign high probability to the move you actually played. You are the teacher; your moves are the labels.
+
+**2. Outcome weighting**
+Pure behavioural cloning would copy your blunders just as readily as your good moves. Outcome weighting fixes this by scaling each training example by the game result:
+
+| Outcome | Weight | Effect |
+|---------|--------|--------|
+| Win | +1.0 | Reinforce these moves — play them more |
+| Draw | 0.0 | Ignore — no gradient update |
+| Loss | −1.0 | Discourage these moves — play them less |
+
+**Loss function**
+
+For each move in a batch:
+```
+loss = −log_prob(move_played) × outcome
+```
+
+Averaged across the batch and minimised by the **Adam optimiser** (learning rate 0.001).
+
+- When outcome is +1.0: the model is penalised for giving the move low probability → it learns to favour that move.
+- When outcome is −1.0: the gradient is inverted → the model is pushed *away* from that move.
+- When outcome is 0.0: no gradient, no change.
+
+**Training schedule**
+
+After every game, the full accumulated dataset is shuffled and trained for 5 epochs in batches of 64. Every new game causes the model to re-learn from all historical games, not just the most recent one.
+
+---
+
 ## Requirements
 
 - Python 3.10+

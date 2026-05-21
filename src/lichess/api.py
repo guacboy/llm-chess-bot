@@ -1,4 +1,5 @@
 import os
+import time
 import chess
 import chess.engine
 import torch
@@ -197,31 +198,43 @@ def run_lichess_loop(model: ChessNet, device: torch.device) -> None:
     games_played = 0
 
     try:
-        for event in client.bots.stream_incoming_events():
+        while True:
+            try:
+                for event in client.bots.stream_incoming_events():
 
-            if event["type"] == "challenge":
-                challenge_id = event["challenge"]["id"]
-                challenger = event["challenge"]["challenger"]["id"]
-                print(f"Challenge from {challenger} - accepting...")
-                client.bots.accept_challenge(challenge_id)
+                    if event["type"] == "challenge":
+                        challenge_id = event["challenge"]["id"]
+                        challenger = event["challenge"]["challenger"]["id"]
+                        print(f"Challenge from {challenger} - accepting...")
+                        client.bots.accept_challenge(challenge_id)
 
-            elif event["type"] == "gameStart":
-                game_id = event["game"]["id"]
+                    elif event["type"] == "gameStart":
+                        game_id = event["game"]["id"]
 
-                new_experiences = handle_game(
-                    client, game_id, bot_username,
-                    model, device, games_played, sf_engine,
-                )
+                        new_experiences = handle_game(
+                            client, game_id, bot_username,
+                            model, device, games_played, sf_engine,
+                        )
 
-                if new_experiences:
-                    games_played += 1
-                    all_experiences = save_experiences(new_experiences)
-                    print(f"\nSaved {len(new_experiences)} new moves. "
-                          f"Total dataset: {len(all_experiences)} moves.")
-                    train(model, device, all_experiences)
-                    save_model(model)
+                        if new_experiences:
+                            games_played += 1
+                            all_experiences = save_experiences(new_experiences)
+                            print(f"\nSaved {len(new_experiences)} new moves. "
+                                  f"Total dataset: {len(all_experiences)} moves.")
+                            train(model, device, all_experiences)
+                            save_model(model)
 
-                print("\nWaiting for next challenge...\n")
+                        print("\nWaiting for next challenge...\n")
+
+            except KeyboardInterrupt:
+                # Ctrl+C - user wants to quit, let it propagate out.
+                raise
+
+            except Exception as e:
+                # Connection dropped or Lichess timed out - wait and reconnect.
+                print(f"\nConnection lost: {e}")
+                print("Reconnecting in 5 seconds...")
+                time.sleep(5)
 
     finally:
         # Always close the Stockfish process cleanly when the program exits.

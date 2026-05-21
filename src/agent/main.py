@@ -1,8 +1,10 @@
 import sys
 import argparse
 import torch
+from pathlib import Path
 
-sys.path.insert(0, "src")
+# __file__ is src/agent/main.py - go up two levels to reach src/
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from agent.model import ChessNet
 from agent.trainer import load_model, clear_model

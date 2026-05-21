@@ -36,6 +36,30 @@ def find_stockfish() -> str | None:
     return None
 
 
+PIECE_NAMES = {
+    chess.PAWN:   "Pawn",
+    chess.KNIGHT: "Knight",
+    chess.BISHOP: "Bishop",
+    chess.ROOK:   "Rook",
+    chess.QUEEN:  "Queen",
+    chess.KING:   "King",
+}
+
+
+def format_move(board: chess.Board, move: chess.Move) -> str:
+    """
+    Returns a human-readable move description, e.g.:
+      [12] Pawn d2 -> d4
+    board must be the position BEFORE the move is played so the piece is still on its origin square.
+    """
+    piece = board.piece_at(move.from_square)
+    piece_name = PIECE_NAMES.get(piece.piece_type, "?") if piece else "?"
+    from_sq = chess.square_name(move.from_square)
+    to_sq = chess.square_name(move.to_square)
+    move_num = board.fullmove_number
+    return f"[{move_num}] {piece_name} {from_sq} -> {to_sq}"
+
+
 def reconstruct_board(moves_str: str) -> chess.Board:
     """
     Rebuilds a chess.Board by replaying all moves from a space-separated UCI string.
@@ -110,7 +134,7 @@ def handle_game(
                 move, source = get_bot_move(board, model, device, epsilon, sf_engine)
                 move_counts[source] += 1
                 client.bots.make_move(game_id, move.uci())
-                print(f"Bot plays: {move.uci()}  [{source}]")
+                print(f"Bot plays:   {format_move(board, move)}  [{source}]")
 
         # --- gameState: sent on every move or status change ---
         elif event["type"] == "gameState":
@@ -129,7 +153,7 @@ def handle_game(
                     user_records.append(
                         (board_to_tensor(board_before), encode_move(user_move))
                     )
-                    print(f"User played: {move_uci}")
+                    print(f"User played: {format_move(board_before, user_move)}")
 
             last_move_count = len(moves)
             board = reconstruct_board(moves_str)
@@ -166,7 +190,7 @@ def handle_game(
                 move, source = get_bot_move(board, model, device, epsilon, sf_engine)
                 move_counts[source] += 1
                 client.bots.make_move(game_id, move.uci())
-                print(f"Bot plays: {move.uci()}  [{source}]")
+                print(f"Bot plays:   {format_move(board, move)}  [{source}]")
 
     return [(t, idx, 0.0) for t, idx in user_records]
 

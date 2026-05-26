@@ -14,9 +14,13 @@ from agent.trainer import train, save_model
 
 load_dotenv()
 
+#TODO(feat): have stockfish adjust to constantly adjust rating based on user's performance
+#TODO(feat): user docker machine
 
 def get_client() -> berserk.Client:
-    """Creates and returns an authenticated Lichess API client."""
+    """
+    Creates and returns an authenticated Lichess API client.
+    """
     token = os.environ["LICHESS_BOT_API"]
     session = berserk.TokenSession(token)
     return berserk.Client(session)
@@ -49,7 +53,7 @@ PIECE_NAMES = {
 def format_move(board: chess.Board, move: chess.Move) -> str:
     """
     Returns a human-readable move description, e.g.:
-      [12] Pawn d2 -> d4
+        [12] Pawn d2 -> d4
     board must be the position BEFORE the move is played so the piece is still on its origin square.
     """
     piece = board.piece_at(move.from_square)
@@ -75,9 +79,9 @@ def reconstruct_board(moves_str: str) -> chess.Board:
 def get_outcome(winner: str | None, user_color: chess.Color) -> float:
     """
     Converts the Lichess winner string into an outcome from the user's perspective.
-      +1.0 = user won
-       0.0 = draw or abandoned
-      -1.0 = user lost
+        +1.0 = user won
+        0.0 = draw or abandoned
+        -1.0 = user lost
     """
     if winner == "white":
         return 1.0 if user_color == chess.WHITE else -1.0
@@ -116,7 +120,7 @@ def handle_game(
 
     for event in client.bots.stream_game_state(game_id):
 
-        # --- gameFull: sent once at the start ---
+        # gameFull: sent once at the start.
         if event["type"] == "gameFull":
             white_id = event["white"].get("id", "")
             bot_color = chess.WHITE if white_id == bot_username else chess.BLACK
@@ -136,7 +140,7 @@ def handle_game(
                 client.bots.make_move(game_id, move.uci())
                 print(f"Bot plays:   {format_move(board, move)}  [{source}]")
 
-        # --- gameState: sent on every move or status change ---
+        # gameState: sent on every move or status change.
         elif event["type"] == "gameState":
             moves_str = event.get("moves", "")
             moves = moves_str.split() if moves_str else []
@@ -158,7 +162,7 @@ def handle_game(
             last_move_count = len(moves)
             board = reconstruct_board(moves_str)
 
-            # Game over - print summary and return experiences.
+            # Game over: print summary and return experiences.
             if status != "started":
                 winner = event.get("winner")
                 outcome = get_outcome(winner, user_color)
@@ -170,7 +174,7 @@ def handle_game(
                 else:
                     print("\nResult: Draw.")
 
-                # --- Move source breakdown ---
+                # Move source breakdown.
                 total_bot_moves = sum(move_counts.values())
                 if total_bot_moves > 0:
                     model_pct  = move_counts["model"]      / total_bot_moves * 100
@@ -185,7 +189,7 @@ def handle_game(
 
                 return [(t, idx, outcome) for t, idx in user_records]
 
-            # Still going - send bot's next move.
+            # Still going: send bot's next move.
             if not board.is_game_over() and board.turn == bot_color:
                 move, source = get_bot_move(board, model, device, epsilon, sf_engine)
                 move_counts[source] += 1
@@ -197,10 +201,10 @@ def handle_game(
 
 def run_lichess_loop(model: ChessNet, device: torch.device) -> None:
     """
-    Main event loop. Initialises Stockfish, then connects to Lichess and
+    Main event loop. Initializes Stockfish, then connects to Lichess and
     accepts challenges indefinitely. After each game, trains the model and saves.
     """
-    # --- Stockfish setup ---
+    # Stockfish setup.
     sf_path = find_stockfish()
     sf_engine: chess.engine.SimpleEngine | None = None
     try:
@@ -209,7 +213,7 @@ def run_lichess_loop(model: ChessNet, device: torch.device) -> None:
     except Exception as e:
         print(f"Stockfish not available ({e}) - falling back to random moves.")
 
-    # --- Lichess setup ---
+    # Lichess setup.
     client = get_client()
     bot_username = client.account.get()["id"]
     print(f"Connected to Lichess as: {bot_username}")
@@ -251,7 +255,6 @@ def run_lichess_loop(model: ChessNet, device: torch.device) -> None:
                         print("\nWaiting for next challenge...\n")
 
             except KeyboardInterrupt:
-                # Ctrl+C - user wants to quit, let it propagate out.
                 raise
 
             except Exception as e:
@@ -261,6 +264,5 @@ def run_lichess_loop(model: ChessNet, device: torch.device) -> None:
                 time.sleep(5)
 
     finally:
-        # Always close the Stockfish process cleanly when the program exits.
         if sf_engine is not None:
             sf_engine.quit()

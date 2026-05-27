@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 from agent.model import ChessNet
 
-MODEL_PATH = Path(__file__).parent.parent.parent / "saved_models" / "model.pt"
+MODEL_PATH = Path(__file__).parent.parent / "data" / "model.pt"
 
 
 def train(

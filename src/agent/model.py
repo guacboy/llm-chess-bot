@@ -5,7 +5,6 @@ import torch.nn as nn
 INPUT_SIZE = 773    # Total number of numbers we use to describe one board position.
 OUTPUT_SIZE = 4096  # 64 * 64 = 4096 possible from/to combinations.
 
-#TODO(chore): save model in data file
 
 class ChessNet(nn.Module):
     """

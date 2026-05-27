@@ -7,8 +7,7 @@ __pycache__/
 *.pyo
 *.pyd
 
-# Saved model checkpoints and game data (will be generated at runtime)
-saved_models/
+# Game data and trained model (generated at runtime)
 data/
 
 # Stockfish binary (download manually — see requirements.txt)

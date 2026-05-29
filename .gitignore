@@ -10,8 +10,8 @@ __pycache__/
 # Game data and trained model (generated at runtime)
 data/
 
-# Stockfish binary (download manually — see requirements.txt)
-src/stockfish/
+# Stockfish binary (download manually - see requirements.txt)
+api/stockfish/
 
 # Environment variables
 .env
@@ -24,3 +24,7 @@ src/stockfish/
 dist/
 build/
 *.egg-info/
+
+# Node
+web/node_modules/
+web/dist/

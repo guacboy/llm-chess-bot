@@ -1,36 +1,45 @@
 import sys
 import argparse
-import torch
+import uvicorn
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))         # src/ - for agent imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))  # project root - for api imports
 
-from agent.model import ChessNet
-from agent.trainer import load_model, clear_model
+from agent.trainer import clear_model
 from agent.game import clear_experiences
-from lichess.api import run_lichess_loop
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="LLM Chess Bot")
+    parser = argparse.ArgumentParser(description="Mirror AI Chess Bot")
     parser.add_argument(
         "--reset-model",
         action="store_true",
-        help="Delete saved model weights and exit. Bot will start from scratch next run.",
+        help="Delete saved model weights and exit.",
     )
     parser.add_argument(
         "--reset-data",
         action="store_true",
-        help="Delete all saved game experience and exit. Dataset rebuilds from next game.",
+        help="Delete all saved game experience and exit.",
     )
     parser.add_argument(
         "--reset-all",
         action="store_true",
         help="Delete both model weights and game experience, then exit.",
     )
+    parser.add_argument(
+        "--host",
+        default="127.0.0.1",
+        help="Host to bind the server to (default: 127.0.0.1).",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8000,
+        help="Port to run the server on (default: 8000).",
+    )
     args = parser.parse_args()
 
-    # --- Reset flags (exit after clearing, don't start the bot) ---
     if args.reset_all:
         clear_model()
         clear_experiences()
@@ -44,14 +53,14 @@ def main() -> None:
         clear_experiences()
         return
 
-    # --- Normal startup ---
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Using device: {device}")
-
-    model = ChessNet().to(device)
-    load_model(model, device)
-
-    run_lichess_loop(model, device)
+    print(f"Starting server at http://{args.host}:{args.port}")
+    print("Open that URL in your browser to play.\n")
+    uvicorn.run(
+        "api.main:app",
+        host=args.host,
+        port=args.port,
+        reload=False,
+    )
 
 
 if __name__ == "__main__":

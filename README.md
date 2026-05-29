@@ -1,32 +1,28 @@
 # Mirror AI Chess Bot
 
-A chess bot that learns your playstyle and plays it back against you on Lichess. The idea is that you are essentially **playing against yourself** - the bot observes your moves, learns your tendencies, and gradually mirrors them back at you to help you identify recurring patterns and mistakes.
-
----
+A chess bot that learns your playstyle and plays it back against you. The idea is that you are essentially **playing against yourself** - the bot observes your moves, learns your tendencies, and gradually mirrors them back at you to help you identify recurring patterns and mistakes.
 
 ## How it works
 
 The bot starts by playing Stockfish's best move in every position. As you play more games, it shifts away from Stockfish and increasingly plays moves predicted by a neural network trained exclusively on **your** moves. By game 19, the bot plays your style 95% of the time.
 
 **Learning signal:** After each game, every move you played is weighted by the outcome:
-- Win → those moves get reinforced
-- Loss → those moves get discouraged
-- Draw → ignored
+- Win  -> those moves get reinforced
+- Loss -> those moves get discouraged
+- Draw -> ignored
 
 Over time the bot learns not just your style, but your *winning* style.
 
----
-
 ## Algorithm
 
-### Model architecture — Feedforward Neural Network (MLP)
+### Model architecture - Feedforward Neural Network (MLP)
 
 The model is a **Multi-Layer Perceptron** built in PyTorch with ~1.84 million trainable parameters.
 
-**Input — board encoding (773 numbers)**
+**Input - board encoding (773 numbers)**
 
 Every chess position is converted into a flat vector of 773 floating-point numbers:
-- 12 binary 8×8 grids — one per piece type per colour (pawn, knight, bishop, rook, queen, king × white/black). Each cell is `1.0` if that piece occupies that square, `0.0` otherwise.
+- 12 binary 8*8 grids - one per piece type per color (pawn, knight, bishop, rook, queen, king * white/black). Each cell is `1.0` if that piece occupies that square, `0.0` otherwise.
 - 1 value for whose turn it is (`1.0` = white, `0.0` = black)
 - 4 values for castling rights (one per right, `1.0` or `0.0`)
 
@@ -34,23 +30,25 @@ Every chess position is converted into a flat vector of 773 floating-point numbe
 
 ```
 Input       773  numbers  (board state)
-    ↓  Linear + ReLU
+    |  Linear + ReLU
+    v
 Layer 1     512  neurons
-    ↓  Linear + ReLU
+    |  Linear + ReLU
+    v
 Layer 2     512  neurons
-    ↓  Linear + ReLU
+    |  Linear + ReLU
+    v
 Layer 3     256  neurons
-    ↓  Linear
-Output     4096  numbers  (one score per possible from→to move)
+    |  Linear
+    v
+Output     4096  numbers  (one score per possible from -> to move)
 ```
 
-**Output — move selection**
+**Output - move selection**
 
-The 4096 output scores cover every possible from-square/to-square combination (64 × 64). Before selecting a move, all illegal moves are masked to `-inf` and softmax is applied so the remaining scores sum to 1.0. The move with the highest probability is played.
+The 4096 output scores cover every possible from-square/to-square combination (64 * 64). Before selecting a move, all illegal moves are masked to `-inf` and softmax is applied so the remaining scores sum to 1.0. The move with the highest probability is played.
 
----
-
-### Learning algorithm — Outcome-Weighted Behavioural Cloning
+### Learning algorithm - Outcome-Weighted Behavioural Cloning
 
 The training approach combines two ideas:
 
@@ -62,9 +60,9 @@ Pure behavioural cloning would copy your blunders just as readily as your good m
 
 | Outcome | Weight | Effect |
 |---------|--------|--------|
-| Win | +1.0 | Reinforce these moves — play them more |
-| Draw | 0.0 | Ignore — no gradient update |
-| Loss | −1.0 | Discourage these moves — play them less |
+| Win | +1.0 | Reinforce these moves - play them more |
+| Draw | 0.0 | Ignore - no gradient update |
+| Loss | −1.0 | Discourage these moves - play them less |
 
 **Loss function**
 
@@ -75,25 +73,20 @@ loss = −log_prob(move_played) × outcome
 
 Averaged across the batch and minimised by the **Adam optimiser** (learning rate 0.001).
 
-- When outcome is +1.0: the model is penalised for giving the move low probability → it learns to favour that move.
-- When outcome is −1.0: the gradient is inverted → the model is pushed *away* from that move.
+- When outcome is +1.0: the model is penalised for giving the move low probability -> it learns to favour that move.
+- When outcome is −1.0: the gradient is inverted -> the model is pushed *away* from that move.
 - When outcome is 0.0: no gradient, no change.
 
 **Training schedule**
 
 After every game, the full accumulated dataset is shuffled and trained for 5 epochs in batches of 64. Every new game causes the model to re-learn from all historical games, not just the most recent one.
 
----
-
 ## Requirements
 
 - Python 3.10+
+- Node.js 18+ (for building the frontend)
 - NVIDIA GPU (recommended) or CPU
-- A [Lichess](https://lichess.org) account for yourself
-- A separate Lichess **bot** account (see setup below)
 - [Stockfish](https://stockfishchess.org/download/) binary
-
----
 
 ## Setup
 
@@ -133,53 +126,44 @@ pip install -r requirements.txt
 ### 5. Download Stockfish
 
 1. Download the Windows binary from [stockfishchess.org/download](https://stockfishchess.org/download/)
-2. Extract and place the `.exe` inside `src/stockfish/`
+2. Extract and place the `.exe` inside `api/stockfish/`
 
 ```
-src/stockfish/stockfish-windows-x86-64-avx2.exe
+api/stockfish/stockfish-windows-x86-64-avx2.exe
 ```
 
 The bot auto-detects any `.exe` in that folder at startup.
 
-### 6. Create a Lichess bot account
-
-1. Create a **new** Lichess account (do not use your main account - bot upgrade is irreversible)
-2. In that account's settings, generate a **Personal API access token** with bot permissions
-3. Create a `.env` file in the project root:
-
-```
-LICHESS_BOT_API=your_token_here
-```
-
-4. Upgrade the account to bot status (one-time, run from the project root):
+### 6. Build the frontend
 
 ```bash
-python -c "
-import os, requests
-from dotenv import load_dotenv
-load_dotenv()
-r = requests.post('https://lichess.org/api/bot/account/upgrade',
-    headers={'Authorization': f'Bearer {os.environ[\"LICHESS_BOT_API\"]}'})
-print(r.json())
-"
+cd web
+npm install
+npm run build
+cd ..
 ```
 
----
+This produces `web/dist/`, which the server serves automatically in production.
 
-## Running the bot
+### Development mode
+
+Run the backend and frontend in separate terminals:
 
 ```bash
+# Terminal 1 - Python server
 venv\Scripts\python src\agent\main.py
+
+# Terminal 2 - Vite dev server
+cd web
+npm run dev
 ```
 
-Then go to your bot account's Lichess profile from your regular account and click **Challenge**. The terminal will display every move, the bot's move source (Stockfish vs learned style), and training progress after each game.
-
----
+Then open [http://localhost:5173](http://localhost:5173). The React app connects directly to the FastAPI WebSocket at port 8000.
 
 ## Resetting
 
 ```bash
-# Wipe learned weights only (if you want the bot to relearn from your existing games)
+# Wipe learned weights only (bot relearns from your existing game data)
 venv\Scripts\python src\agent\main.py --reset-model
 
 # Wipe game data only (if your playstyle has changed significantly)
@@ -189,28 +173,48 @@ venv\Scripts\python src\agent\main.py --reset-data
 venv\Scripts\python src\agent\main.py --reset-all
 ```
 
----
+## Persistent data
+
+All model data survives server restarts. Three files are written to `src/data/`:
+
+| File | Contents |
+|------|----------|
+| `model.pt` | Learned neural network weights |
+| `games.pt` | Every move you've ever played, with its outcome |
+| `games_played.txt` | Game count used for epsilon decay |
+
+Refreshing the browser has no effect on any of these. They are only removed by the `--reset-*` flags above.
 
 ## Project structure
 
 ```
 llm-chess-bot/
+├── api/
+│   ├── main.py          # FastAPI server - WebSocket game loop, training trigger
+│   ├── __init__.py
+│   └── stockfish/       # Place Stockfish .exe here (gitignored)
 ├── src/
 │   ├── agent/
 │   │   ├── encoder.py   # Converts board position into a tensor (773 numbers)
-│   │   ├── model.py     # Neural network (773 → 4096 move scores)
+│   │   ├── model.py     # Neural network (773 -> 4096 move scores)
 │   │   ├── trainer.py   # Trains model on game data, saves/loads weights
 │   │   ├── game.py      # Epsilon decay, bot move selection, data persistence
 │   │   └── main.py      # Entry point and CLI flags
-│   ├── lichess/
-│   │   └── api.py       # Lichess API loop, Stockfish integration, game streaming
-│   └── stockfish/       # Place Stockfish .exe here (gitignored)
-├── saved_models/        # Trained weights saved here (gitignored)
-├── .env                 # Lichess API token (gitignored, never commit)
+│   └── data/            # Persistent model and game data (gitignored)
+│       ├── model.pt
+│       ├── games.pt
+│       └── games_played.txt
+├── web/
+│   ├── src/
+│   │   ├── App.jsx                  # Root component - WebSocket logic, game state
+│   │   └── components/
+│   │       ├── Board.jsx            # Interactive chess board (react-chessboard)
+│   │       ├── MoveLog.jsx          # Scrollable move history panel
+│   │       └── Status.jsx           # Status text display
+│   ├── index.html
+│   └── vite.config.js
 └── requirements.txt
 ```
-
----
 
 ## Bot behaviour over time
 
@@ -222,4 +226,4 @@ llm-chess-bot/
 | 15   | 25%       | 75%           |
 | 19+  | 5%        | 95%           |
 
-To reach minimum Stockfish usage faster or slower, adjust `EPSILON_DECAY` in `src/agent/game.py`.
+To reach minimum Stockfish usage faster or slower, adjust `EPSILON_DECAY` in [src/agent/game.py](src/agent/game.py).

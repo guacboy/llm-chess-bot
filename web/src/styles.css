@@ -1,0 +1,19 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body, #root {
+    height: 100%;
+    overflow: hidden;
+}
+
+.btn {
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.btn:hover {
+    background: #8eafd4 !important;
+    color: #000000 !important;
+}

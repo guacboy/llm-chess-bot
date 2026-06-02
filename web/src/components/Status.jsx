@@ -10,11 +10,13 @@ export default function Status({ text }) {
 const styles = {
     box: {
         padding: "10px 12px",
-        background: "#16213e",
-        border: "1px solid #333",
-        borderRadius: 4,
-        fontSize: 13,
+        background: "rgba(255,255,255,0.03)",
+        border: "1px solid rgba(142,175,212,0.2)",
+        borderRadius: 6,
+        fontSize: 14,
         lineHeight: "1.6",
-        color: "#ccc",
+        color: "#8eafd4",
+        fontFamily: "'Rajdhani', sans-serif",
+        letterSpacing: 0.5,
     },
 };

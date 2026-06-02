@@ -13,7 +13,6 @@ const WS_URL = import.meta.env.PROD
 // TODO(feat): user's w/l-stats can be viewed at the bottom.
 // TODO(feat): settings option (ability to reset model, import games).
 // TODO(feat): sound effects
-// TODO(chore): change background coloring to a more darker theme.
 
 export default function App() {
     // phase controls which screen is shown:
@@ -141,16 +140,15 @@ export default function App() {
 
     return (
         <div style={styles.page}>
-            <h1 style={styles.title}>Mirror AI Chess Bot</h1>
-
             {phase === "setup" && (
                 <div style={styles.setup}>
+                    <h1 style={styles.title}>Mirror AI Chess Bot</h1>
                     <p style={styles.subtitle}>Pick your color to start a game.</p>
                     <div style={styles.colorButtons}>
-                        <button style={styles.btn} onClick={() => startGame("white")}>
+                        <button className="btn" style={styles.btn} onClick={() => startGame("white")}>
                             Play as White
                         </button>
-                        <button style={styles.btn} onClick={() => startGame("black")}>
+                        <button className="btn" style={styles.btn} onClick={() => startGame("black")}>
                             Play as Black
                         </button>
                     </div>
@@ -158,58 +156,68 @@ export default function App() {
             )}
 
             {phase !== "setup" && (
-                <div style={styles.game}>
-                    <Board
-                        fen={fen}
-                        userColor={userColor}
-                        onMove={handleMove}
-                        disabled={phase === "over"}
-                    />
-                    <div style={styles.sidebar}>
-                        <Status text={status} />
-                        <MoveLog moves={moveLog} />
-                        {phase === "over" && (
-                            <button
-                                style={{ ...styles.btn, marginTop: 16 }}
-                                onClick={handlePlayAgain}
-                            >
-                                Play Again
-                            </button>
-                        )}
+                <>
+                    <h1 style={styles.title}>Mirror AI Chess Bot</h1>
+                    <div style={styles.game}>
+                        <Board
+                            fen={fen}
+                            userColor={userColor}
+                            onMove={handleMove}
+                            disabled={phase === "over"}
+                        />
+                        <div style={styles.sidebar}>
+                            <Status text={status} />
+                            <MoveLog moves={moveLog} />
+                            {phase === "over" && (
+                                <button
+                                    className="btn"
+                                    style={{ ...styles.btn, marginTop: 16 }}
+                                    onClick={handlePlayAgain}
+                                >
+                                    Play Again
+                                </button>
+                            )}
+                        </div>
                     </div>
-                </div>
+                </>
             )}
+
+            <div style={styles.watermark}>Made by Dylan Nguyen :)</div>
         </div>
     );
 }
 
 const styles = {
     page: {
-        minHeight: "100vh",
-        background: "#1a1a2e",
-        color: "#eee",
-        fontFamily: "monospace",
-        padding: "24px",
-        boxSizing: "border-box",
+        height: "100vh",
+        background: "linear-gradient(160deg, #000000 0%, #1c1c1c 45%, #0a0a0a 100%)",
+        color: "#b0b8c8",
+        fontFamily: "'Rajdhani', sans-serif",
+        padding: "12px 12px 4px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
     },
     title: {
-        margin: "0 0 8px",
-        fontSize: 22,
-        letterSpacing: 1,
-        color: "#c9a84c",
+        margin: "0 0 6px",
+        fontSize: 30,
+        letterSpacing: 4,
+        color: "#8eafd4",
+        fontWeight: 600,
+        textAlign: "center",
     },
     subtitle: {
         margin: "0 0 20px",
-        color: "#aaa",
+        color: "#606878",
+        fontSize: 15,
+        textAlign: "center",
     },
     setup: {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        marginTop: 40,
+        flex: 1,
+        justifyContent: "center",
     },
     colorButtons: {
         display: "flex",
@@ -217,20 +225,21 @@ const styles = {
     },
     btn: {
         padding: "10px 22px",
-        background: "#c9a84c",
-        color: "#1a1a2e",
-        border: "none",
+        background: "transparent",
+        color: "#8eafd4",
+        border: "1px solid #8eafd4",
         borderRadius: 4,
         cursor: "pointer",
-        fontFamily: "monospace",
-        fontWeight: "bold",
-        fontSize: 14,
+        fontFamily: "'Rajdhani', sans-serif",
+        fontWeight: 600,
+        fontSize: 15,
+        letterSpacing: 1,
     },
     game: {
         display: "flex",
         gap: 28,
         alignItems: "flex-start",
-        marginTop: 20,
+        marginTop: 12,
         flexWrap: "wrap",
         justifyContent: "center",
     },
@@ -239,5 +248,13 @@ const styles = {
         flexDirection: "column",
         width: 280,
         minWidth: 220,
+    },
+    watermark: {
+        marginTop: "auto",
+        paddingTop: 6,
+        fontSize: 12,
+        color: "#2e3440",
+        letterSpacing: 1,
+        fontFamily: "'Rajdhani', sans-serif",
     },
 };

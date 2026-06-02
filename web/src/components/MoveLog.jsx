@@ -34,30 +34,33 @@ export default function MoveLog({ moves }) {
 const styles = {
     container: {
         marginTop: 16,
-        border: "1px solid #333",
-        borderRadius: 4,
+        border: "1px solid rgba(142,175,212,0.15)",
+        borderRadius: 6,
         overflow: "hidden",
     },
     header: {
         padding: "6px 10px",
-        background: "#16213e",
+        background: "rgba(255,255,255,0.03)",
         fontSize: 11,
-        letterSpacing: 1,
+        letterSpacing: 2,
         textTransform: "uppercase",
-        color: "#888",
+        color: "#4a5a6a",
+        fontFamily: "'Rajdhani', sans-serif",
     },
     list: {
         maxHeight: 320,
         overflowY: "auto",
         padding: "6px 10px",
-        background: "#0f0f1a",
+        background: "rgba(0,0,0,0.4)",
     },
     entry: {
         fontSize: 13,
         lineHeight: "1.8",
+        fontFamily: "'Share Tech Mono', monospace",
     },
     empty: {
         fontSize: 13,
-        color: "#555",
+        color: "#333a44",
+        fontFamily: "'Share Tech Mono', monospace",
     },
 };

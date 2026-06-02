@@ -103,7 +103,7 @@ cd mirror-ai-chess-bot
 python -m venv venv
 
 # Windows
-venv\Scripts\activate
+venv/Scripts/activate
 
 # macOS / Linux
 source venv/bin/activate
@@ -151,7 +151,7 @@ Run the backend and frontend in separate terminals:
 
 ```bash
 # Terminal 1 - Python server
-venv\Scripts\python src\agent\main.py
+python src/agent/main.py
 
 # Terminal 2 - Vite dev server
 cd web
@@ -164,13 +164,13 @@ Then open [http://localhost:5173](http://localhost:5173). The React app connects
 
 ```bash
 # Wipe learned weights only (bot relearns from your existing game data)
-venv\Scripts\python src\agent\main.py --reset-model
+python src/agent/main.py --reset-model
 
 # Wipe game data only (if your playstyle has changed significantly)
-venv\Scripts\python src\agent\main.py --reset-data
+python src/agent/main.py --reset-data
 
 # Full reset - start completely fresh
-venv\Scripts\python src\agent\main.py --reset-all
+python src/agent/main.py --reset-all
 ```
 
 ## Persistent data

@@ -11,9 +11,9 @@ const WS_URL = import.meta.env.PROD
 // TODO(fix): website auto-scrolls down when new move is printed.
 // TODO(feat): add draw/abort options, also ability to view previous moves.
 // TODO(feat): user's w/l-stats can be viewed at the bottom.
-// TODO(feat): settings option (ability to reset model, import games, board coloring?).
+// TODO(feat): settings option (ability to reset model, import games).
+// TODO(feat): sound effects
 // TODO(chore): change background coloring to a more darker theme.
-// TODO(chore): center board and options.
 
 export default function App() {
     // phase controls which screen is shown:
@@ -191,6 +191,9 @@ const styles = {
         fontFamily: "monospace",
         padding: "24px",
         boxSizing: "border-box",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
     },
     title: {
         margin: "0 0 8px",
@@ -205,7 +208,7 @@ const styles = {
     setup: {
         display: "flex",
         flexDirection: "column",
-        alignItems: "flex-start",
+        alignItems: "center",
         marginTop: 40,
     },
     colorButtons: {
@@ -229,6 +232,7 @@ const styles = {
         alignItems: "flex-start",
         marginTop: 20,
         flexWrap: "wrap",
+        justifyContent: "center",
     },
     sidebar: {
         display: "flex",
